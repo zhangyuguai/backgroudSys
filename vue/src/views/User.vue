@@ -141,8 +141,8 @@ export default {
         }
       }).then(
           response => {
-            this.tableData = response.records
-            this.total = response.total
+            this.tableData = response.data.records
+            this.total = response.data.total
           },
           error => {
             console.log(error.getMessage())
@@ -172,8 +172,11 @@ export default {
       this.dialogFormVisible = false;
       request.post("/user", this.form).then(
           res => {
-            if (res === true) {
+            if (res.code === 200) {
               this.$message.success("保存成功");
+              this.load()
+            }else{
+              this.$message.success(res.data.msg);
               this.load()
             }
           },
@@ -192,9 +195,12 @@ export default {
       const id = scope.row.id;
       request.delete("/user/" + id).then(
           res => {
-            if (res === true) {
+            if (res.code === 200) {
               this.$message.success("删除成功");
               this.load();
+            }else{
+              this.$message.success(res.data.msg);
+              this.load()
             }
           },
           error => {
@@ -211,9 +217,12 @@ export default {
         data: multipleTable
       }).then(
           res => {
-            if (res === true) {
+            if (res.code === 200) {
               this.$message.success("删除成功");
               this.load();
+            }else{
+              this.$message.success(res.data.msg);
+              this.load()
             }
           },
           error => {

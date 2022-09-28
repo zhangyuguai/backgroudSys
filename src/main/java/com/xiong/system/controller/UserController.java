@@ -4,8 +4,10 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
+import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xiong.system.DTO.UserDTO;
+import com.xiong.system.common.Result;
 import com.xiong.system.entity.User;
 import com.xiong.system.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,13 +15,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.InputStream;
 import java.net.URLEncoder;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author xsy
@@ -34,42 +33,57 @@ public class UserController {
     private UserService userService;
 
     @GetMapping
-    public List<User> save() {
-        return userService.selectAll();
+    public Result save() {
+        List<User> userList = userService.selectAll();
+
+        return Result.success(userList);
     }
 
     @PostMapping
-    public Boolean save(@RequestBody User user) {
-        return userService.saveUser(user);
+    public Result save(@RequestBody User user) {
+        if ( userService.saveUser(user)) {
+            return Result.success(user);
+        }
+        return Result.error("保存失败");
     }
 
     @PostMapping("/login")
-    public Boolean login(@RequestBody UserDTO userDTO){
-        return  userService.login(userDTO);
+    public Result login(@RequestBody UserDTO userDTO){
+        if(userService.login(userDTO)){
+            return  Result.success(userDTO);
+        }
+        return Result.error("登陆失败");
     }
 
     @DeleteMapping("/{id}")
-    public Boolean deleteUser(@PathVariable("id") Integer id) {
-
-        return userService.deleteUser(id);
+    public Result deleteUser(@PathVariable("id") Integer id) {
+        if (userService.deleteUser(id)){
+            return Result.success(id);
+        }
+        return Result.error("删除失败");
     }
 
     @GetMapping("/page")
-    public Page<User> selectPage(@RequestParam Integer pageNum
+    public Result selectPage(@RequestParam Integer pageNum
             , @RequestParam Integer pageSize,
                                  @RequestParam(required = false) String userName,
                                  @RequestParam(required = false) String email,
                                  @RequestParam(required = false) String address) {
+        Page<User> pageInfo = userService.getPageInfo(pageNum, pageSize, userName, email, address);
 
-        return userService.getPageInfo(pageNum, pageSize, userName, email, address);
+
+        return Result.success(pageInfo);
     }
 
     @DeleteMapping("/del/batch")
-    public Boolean delBatch(@RequestBody List<Integer> ids) {
-        return userService.delBatch(ids);
+    public Result delBatch(@RequestBody List<Integer> ids) {
+        if(userService.delBatch(ids)){
+            return Result.success(ids);
+        }
+        return Result.error("删除失败");
     }
     @GetMapping("/export")
-    public void export(HttpServletResponse response) throws Exception {
+    public Result export(HttpServletResponse response) throws Exception {
         // 从数据库查询出所有的数据
         List<User> list = userService.selectAll();
         // 通过工具类创建writer 写出到磁盘路径
@@ -98,10 +112,10 @@ public class UserController {
         writer.flush(out, true);
         out.close();
         writer.close();
-
+        return Result.ok();
     }
     @PostMapping("/import")
-    public Boolean imp(MultipartFile file) throws Exception {
+    public Result imp(MultipartFile file) throws Exception {
         InputStream inputStream = file.getInputStream();
         ExcelReader reader = ExcelUtil.getReader(inputStream);
         // 方式1：(推荐) 通过 javabean的方式读取Excel内的对象，但是要求表头必须是英文，跟javabean的属性要对应起来
@@ -122,8 +136,10 @@ public class UserController {
             users.add(user);
         }
 
-
-        return userService.saveBatchUser(users);
+        if (userService.saveBatchUser(users)){
+            return Result.success(users);
+        }
+        return Result.error("上传失败");
     }
 
 }

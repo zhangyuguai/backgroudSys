@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
  * @date 2022/9/27
  */
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
+//@NoArgsConstructor
+//@AllArgsConstructor
 public class UserDTO extends User {
 
 }

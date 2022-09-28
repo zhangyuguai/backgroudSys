@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xiong.system.DTO.UserDTO;
+import com.xiong.system.common.Result;
 import com.xiong.system.mapper.UserMapper;
 import com.xiong.system.entity.User;
 import com.xiong.system.service.UserService;
@@ -29,7 +30,8 @@ public class UserServiceIml extends ServiceImpl<UserMapper,User> implements User
 
     @Override
     public Boolean saveUser(User user){
-       return saveOrUpdate(user);
+
+        return saveOrUpdate(user);
    }
 
     @Override
